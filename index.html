@@ -1,0 +1,1933 @@
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranjan Command Center</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#1e1b4b',
+                            accent: '#8b5cf6',
+                            gold: '#f59e0b',
+                            emerald: '#10b981',
+                            cyan: '#06b6d4',
+                            rose: '#f43f5e'
+                        },
+                        dark: {
+                            bg: '#080b11',
+                            card: 'rgba(15, 23, 42, 0.65)',
+                            border: 'rgba(255, 255, 255, 0.08)',
+                            hover: 'rgba(255, 255, 255, 0.04)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #080b11;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Glow Background Blobs */
+        .glow-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .glow-blob-1 {
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            filter: blur(80px);
+        }
+        .glow-blob-2 {
+            position: absolute;
+            bottom: -10%;
+            right: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+            filter: blur(90px);
+        }
+        .glow-blob-3 {
+            position: absolute;
+            top: 40%;
+            left: 30%;
+            width: 35vw;
+            height: 35vw;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, rgba(0, 0, 0, 0) 70%);
+            filter: blur(100px);
+        }
+
+        /* Glassmorphism card utility */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-hover:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.15);
+        }
+
+        .glass-input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+        }
+        .glass-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+
+        /* Hide active view */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Checkbox */
+        .custom-checkbox {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        .custom-checkbox:checked {
+            background-color: #6366f1;
+            border-color: #6366f1;
+        }
+        .custom-checkbox:checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: white;
+            font-size: 11px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Ambient Glowing Blobs -->
+    <div class="glow-bg">
+        <div class="glow-blob-1"></div>
+        <div class="glow-blob-2"></div>
+        <div class="glow-blob-3"></div>
+    </div>
+
+    <!-- MAIN WRAPPER -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="w-64 glass-card border-r border-slate-800/80 flex flex-col justify-between transition-all duration-300 z-30 fixed lg:relative -translate-x-full lg:translate-x-0 h-full">
+            <div>
+                <!-- Brand / Logo -->
+                <div class="px-6 py-5 flex items-center justify-between border-b border-slate-800/60">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-brand-500 to-brand-accent flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-500/30">
+                            R
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-base tracking-tight text-white leading-none">Ranjan Center</h1>
+                            <span class="text-[10px] uppercase tracking-wider font-semibold text-brand-400">Command Platform</span>
+                        </div>
+                    </div>
+                    <button id="closeSidebarBtn" class="lg:hidden text-slate-400 hover:text-white text-lg">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Navigation Items -->
+                <nav class="px-3 py-4 space-y-1 overflow-y-auto max-h-[calc(100vh-170px)]">
+                    <a href="#" data-tab="dashboard" class="nav-item active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-white bg-brand-600/20 border border-brand-500/30">
+                        <i class="fa-solid fa-chart-pie w-5 text-brand-400 text-center"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" data-tab="routine" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                        <i class="fa-solid fa-clock w-5 text-slate-400 text-center"></i>
+                        My Routine
+                    </a>
+                    <a href="#" data-tab="tasks" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                        <i class="fa-solid fa-list-check w-5 text-slate-400 text-center"></i>
+                        Tasks & Priorities
+                    </a>
+                    <a href="#" data-tab="business" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                        <i class="fa-solid fa-laptop-code w-5 text-slate-400 text-center"></i>
+                        Website Business
+                    </a>
+                    <a href="#" data-tab="outreach" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                        <i class="fa-solid fa-users-viewfinder w-5 text-slate-400 text-center"></i>
+                        Client Outreach
+                    </a>
+                    <a href="#" data-tab="income" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                        <i class="fa-solid fa-wallet w-5 text-slate-400 text-center"></i>
+                        Income Tracker
+                    </a>
+                    <a href="#" data-tab="learning" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                        <i class="fa-solid fa-graduation-cap w-5 text-slate-400 text-center"></i>
+                        Learning Tracker
+                    </a>
+                    <a href="#" data-tab="notes" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                        <i class="fa-solid fa-note-sticky w-5 text-slate-400 text-center"></i>
+                        Notes & Ideas
+                    </a>
+                    <a href="#" data-tab="analytics" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                        <i class="fa-solid fa-chart-line w-5 text-slate-400 text-center"></i>
+                        Analytics
+                    </a>
+                    <a href="#" data-tab="settings" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                        <i class="fa-solid fa-gear w-5 text-slate-400 text-center"></i>
+                        Settings
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Profile Footer -->
+            <div class="p-4 border-t border-slate-800/60">
+                <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow">
+                            R
+                        </div>
+                        <span class="w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900 absolute bottom-0 right-0"></span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-semibold text-white truncate">Ranjan</h4>
+                        <p class="text-xs text-slate-400 truncate">Website Designer</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="flex-1 flex flex-col h-full overflow-hidden">
+
+            <!-- TOP HEADER -->
+            <header class="h-20 glass-card border-b border-slate-800/80 px-4 sm:px-8 flex items-center justify-between shrink-0 gap-4">
+                <div class="flex items-center gap-4">
+                    <button id="openSidebarBtn" class="lg:hidden text-slate-400 hover:text-white p-2 text-lg">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                            Good Evening, Ranjan <span class="animate-pulse">✨</span>
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-400 hidden sm:block">Stay focused. Build consistently. Grow every day.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <!-- Quick Actions Bar -->
+                    <div class="relative group hidden md:block">
+                        <button class="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold flex items-center gap-2 transition shadow-lg shadow-brand-500/20">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Quick Action</span>
+                            <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 glass-card rounded-xl shadow-2xl py-2 hidden group-hover:block border border-slate-700/60 z-50">
+                            <button onclick="openModal('task')" class="w-full px-4 py-2 text-left text-xs text-slate-300 hover:text-white hover:bg-slate-800/80 flex items-center gap-2.5">
+                                <i class="fa-solid fa-check text-brand-400"></i> Add Priority Task
+                            </button>
+                            <button onclick="openModal('lead')" class="w-full px-4 py-2 text-left text-xs text-slate-300 hover:text-white hover:bg-slate-800/80 flex items-center gap-2.5">
+                                <i class="fa-solid fa-user-plus text-brand-emerald"></i> Add Client Lead
+                            </button>
+                            <button onclick="openModal('income')" class="w-full px-4 py-2 text-left text-xs text-slate-300 hover:text-white hover:bg-slate-800/80 flex items-center gap-2.5">
+                                <i class="fa-solid fa-indian-rupee-sign text-brand-gold"></i> Add Income
+                            </button>
+                            <button onclick="openModal('routine')" class="w-full px-4 py-2 text-left text-xs text-slate-300 hover:text-white hover:bg-slate-800/80 flex items-center gap-2.5">
+                                <i class="fa-solid fa-clock text-brand-cyan"></i> Add Routine Event
+                            </button>
+                            <button onclick="openModal('note')" class="w-full px-4 py-2 text-left text-xs text-slate-300 hover:text-white hover:bg-slate-800/80 flex items-center gap-2.5">
+                                <i class="fa-solid fa-sticky-note text-brand-rose"></i> Add Quick Note
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Date Selector Input -->
+                    <div class="flex items-center bg-slate-900/80 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs text-slate-300">
+                        <i class="fa-regular fa-calendar text-brand-400 mr-2"></i>
+                        <input type="date" id="datePicker" class="bg-transparent text-xs text-white focus:outline-none cursor-pointer">
+                    </div>
+
+                    <!-- Notifications -->
+                    <button class="w-9 h-9 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 relative">
+                        <i class="fa-regular fa-bell text-sm"></i>
+                        <span class="w-2 h-2 rounded-full bg-brand-500 absolute top-2 right-2"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- SCROLLABLE BODY CONTENT -->
+            <main class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8">
+
+                <!-- 1. DASHBOARD VIEW -->
+                <div id="view-dashboard" class="tab-content active space-y-8">
+                    
+                    <!-- KPI CARDS GRID -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                        <!-- Card 1 -->
+                        <div class="glass-card glass-card-hover p-5 rounded-2xl relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Today's Tasks</span>
+                                <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-base border border-indigo-500/20">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-baseline justify-between">
+                                <h3 id="kpi-tasks" class="text-2xl sm:text-3xl font-extrabold text-white">0 / 0</h3>
+                                <span class="text-xs text-indigo-400 font-medium bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20" id="kpi-tasks-pct">0% Completed</span>
+                            </div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden">
+                                <div id="kpi-tasks-bar" class="bg-indigo-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="glass-card glass-card-hover p-5 rounded-2xl relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Productivity</span>
+                                <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-base border border-purple-500/20">
+                                    <i class="fa-solid fa-bolt"></i>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-baseline justify-between">
+                                <h3 id="kpi-productivity" class="text-2xl sm:text-3xl font-extrabold text-white">0%</h3>
+                                <span class="text-xs text-purple-400 font-medium bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">Daily Rate</span>
+                            </div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden">
+                                <div id="kpi-productivity-bar" class="bg-purple-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="glass-card glass-card-hover p-5 rounded-2xl relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Client Leads</span>
+                                <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-base border border-cyan-500/20">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-baseline justify-between">
+                                <h3 id="kpi-leads" class="text-2xl sm:text-3xl font-extrabold text-white">0</h3>
+                                <span class="text-xs text-cyan-400 font-medium bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">Pipeline Leads</span>
+                            </div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden">
+                                <div id="kpi-leads-bar" class="bg-cyan-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4 -->
+                        <div class="glass-card glass-card-hover p-5 rounded-2xl relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Today's Income</span>
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-base border border-emerald-500/20">
+                                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-baseline justify-between">
+                                <h3 id="kpi-income" class="text-2xl sm:text-3xl font-extrabold text-white">₹0</h3>
+                                <span class="text-xs text-emerald-400 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Revenue Today</span>
+                            </div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden">
+                                <div id="kpi-income-bar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STREAK & TOP PRIORITIES SECTION -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <!-- LEFT 2 COLS: TODAY'S TOP PRIORITIES -->
+                        <div class="lg:col-span-2 glass-card p-6 rounded-2xl flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+                                    <div>
+                                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                            <i class="fa-solid fa-star text-brand-gold"></i> Today's Top Priorities
+                                        </h3>
+                                        <p class="text-xs text-slate-400">Execute key tasks to move the needle today.</p>
+                                    </div>
+                                    <button onclick="openModal('task')" class="text-xs bg-brand-600/30 hover:bg-brand-600/50 text-brand-400 px-3 py-1.5 rounded-lg border border-brand-500/30 transition flex items-center gap-1.5 font-medium">
+                                        <i class="fa-solid fa-plus"></i> Add Priority
+                                    </button>
+                                </div>
+
+                                <div id="dashboard-priorities-list" class="space-y-3">
+                                    <!-- Dynamic JS Injection -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT 1 COL: STREAK & QUICK STATS -->
+                        <div class="space-y-6">
+                            <!-- STREAK WIDGET -->
+                            <div class="glass-card p-6 rounded-2xl relative overflow-hidden border-brand-500/20 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-brand-900/20">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-solid fa-fire text-brand-gold text-xl animate-bounce"></i>
+                                        <h3 class="font-bold text-white text-base">Productivity Streak</h3>
+                                    </div>
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-brand-gold/10 text-brand-gold font-semibold border border-brand-gold/20">Daily Streak</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 text-center mt-2">
+                                    <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                                        <p class="text-xs text-slate-400 font-medium">Current Streak</p>
+                                        <p id="streak-current" class="text-2xl font-extrabold text-white mt-1">0 Days</p>
+                                    </div>
+                                    <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                                        <p class="text-xs text-slate-400 font-medium">Best Streak</p>
+                                        <p id="streak-best" class="text-2xl font-extrabold text-brand-gold mt-1">0 Days</p>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-400 text-center mt-4">Complete your Daily Review at night to keep your streak alive!</p>
+                            </div>
+
+                            <!-- PIPELINE QUICK STATS -->
+                            <div class="glass-card p-6 rounded-2xl">
+                                <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                                    <i class="fa-solid fa-funnel-dollar text-brand-cyan"></i> Business Quick View
+                                </h3>
+                                <div class="space-y-2.5 text-xs">
+                                    <div class="flex justify-between items-center p-2 rounded-lg bg-slate-900/40">
+                                        <span class="text-slate-400">Demos Sent This Month</span>
+                                        <span id="quick-demos-sent" class="font-bold text-white">0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 rounded-lg bg-slate-900/40">
+                                        <span class="text-slate-400">Total Revenue This Month</span>
+                                        <span id="quick-month-income" class="font-bold text-emerald-400">₹0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 rounded-lg bg-slate-900/40">
+                                        <span class="text-slate-400">Active Pipeline Value</span>
+                                        <span id="quick-pipeline-value" class="font-bold text-brand-400">₹0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- DAILY REVIEW SECTION -->
+                    <div class="glass-card p-6 rounded-2xl border-indigo-500/20">
+                        <div class="flex items-center justify-between mb-6 pb-3 border-b border-slate-800">
+                            <div>
+                                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-journal-whills text-brand-accent"></i> Daily Review & Reflections
+                                </h3>
+                                <p class="text-xs text-slate-400">End your day with clarity. Record wins, learnings, and plan tomorrow.</p>
+                            </div>
+                            <span class="text-xs text-brand-accent bg-brand-accent/10 px-3 py-1 rounded-full border border-brand-accent/20">Evening Check-in</span>
+                        </div>
+
+                        <form id="daily-review-form" onsubmit="handleDailyReviewSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">What did I complete today?</label>
+                                <textarea id="review-q1" rows="2" class="w-full glass-input rounded-xl p-3 text-xs focus:ring-1 focus:ring-brand-500" placeholder="List major accomplishments..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">What did I learn today?</label>
+                                <textarea id="review-q2" rows="2" class="w-full glass-input rounded-xl p-3 text-xs focus:ring-1 focus:ring-brand-500" placeholder="New web tech, sales insights, personal observations..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">How many clients did I contact & income earned?</label>
+                                <textarea id="review-q3" rows="2" class="w-full glass-input rounded-xl p-3 text-xs focus:ring-1 focus:ring-brand-500" placeholder="e.g. Contacted 15 leads, earned ₹12,000"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">What went wrong & what will I improve tomorrow?</label>
+                                <textarea id="review-q4" rows="2" class="w-full glass-input rounded-xl p-3 text-xs focus:ring-1 focus:ring-brand-500" placeholder="Distractions, missed calls, code bugs to fix..."></textarea>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-brand-gold mb-1">Tomorrow's Top 3 Goals</label>
+                                <input type="text" id="review-q5" class="w-full glass-input rounded-xl p-3 text-xs focus:ring-1 focus:ring-brand-500" placeholder="Goal 1 | Goal 2 | Goal 3">
+                            </div>
+
+                            <div class="md:col-span-2 flex justify-end mt-2">
+                                <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-accent hover:from-brand-500 hover:to-purple-500 text-white font-semibold text-xs shadow-lg shadow-brand-500/25 transition active:scale-95 flex items-center gap-2">
+                                    <i class="fa-solid fa-floppy-disk"></i> Save Daily Review & Update Streak
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
+                <!-- 2. MY ROUTINE VIEW -->
+                <div id="view-routine" class="tab-content space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-800">
+                        <div>
+                            <h2 class="text-xl font-bold text-white">Daily Routine & Schedule</h2>
+                            <p class="text-xs text-slate-400">Structured time blocking for high entrepreneur performance.</p>
+                        </div>
+                        <button onclick="openModal('routine')" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                            <i class="fa-solid fa-plus"></i> Add Time Block
+                        </button>
+                    </div>
+
+                    <!-- Routine Timeline Table/List -->
+                    <div class="glass-card rounded-2xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-900/80 uppercase text-slate-400 font-semibold border-b border-slate-800">
+                                    <tr>
+                                        <th class="p-4">Time Block</th>
+                                        <th class="p-4">Activity</th>
+                                        <th class="p-4">Category</th>
+                                        <th class="p-4">Status</th>
+                                        <th class="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="routine-table-body" class="divide-y divide-slate-800/60">
+                                    <!-- Dynamic Routine JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. TASKS & PRIORITIES VIEW -->
+                <div id="view-tasks" class="tab-content space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-800">
+                        <div>
+                            <h2 class="text-xl font-bold text-white">Tasks & Priorities</h2>
+                            <p class="text-xs text-slate-400">Master action items across client work, business, and self-growth.</p>
+                        </div>
+                        <button onclick="openModal('task')" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                            <i class="fa-solid fa-plus"></i> New Priority Task
+                        </button>
+                    </div>
+
+                    <!-- Filter Tabs -->
+                    <div class="flex gap-2 border-b border-slate-800 pb-2">
+                        <button onclick="filterTasks('all')" class="task-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600/30 text-brand-400 border border-brand-500/30">All Tasks</button>
+                        <button onclick="filterTasks('pending')" class="task-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Pending</button>
+                        <button onclick="filterTasks('completed')" class="task-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Completed</button>
+                    </div>
+
+                    <!-- Full Tasks Grid/List -->
+                    <div id="all-tasks-container" class="space-y-3">
+                        <!-- Dynamic Tasks JS -->
+                    </div>
+                </div>
+
+                <!-- 4. WEBSITE BUSINESS VIEW -->
+                <div id="view-business" class="tab-content space-y-6">
+                    <div class="pb-4 border-b border-slate-800">
+                        <h2 class="text-xl font-bold text-white">Website Designing Business Tracker</h2>
+                        <p class="text-xs text-slate-400">Monitor client acquisition funnel, design demos, and agency metrics.</p>
+                    </div>
+
+                    <!-- SALES FUNNEL INTERACTIVE CARDS -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div class="glass-card p-4 rounded-xl text-center border-l-4 border-l-slate-400">
+                            <p class="text-[10px] uppercase font-bold text-slate-400">Leads</p>
+                            <p id="funnel-leads" class="text-2xl font-black text-white mt-1">0</p>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl text-center border-l-4 border-l-blue-500">
+                            <p class="text-[10px] uppercase font-bold text-blue-400">Contacted</p>
+                            <p id="funnel-contacted" class="text-2xl font-black text-white mt-1">0</p>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl text-center border-l-4 border-l-purple-500">
+                            <p class="text-[10px] uppercase font-bold text-purple-400">Replied</p>
+                            <p id="funnel-replied" class="text-2xl font-black text-white mt-1">0</p>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl text-center border-l-4 border-l-amber-500">
+                            <p class="text-[10px] uppercase font-bold text-amber-400">Demo Sent</p>
+                            <p id="funnel-demo" class="text-2xl font-black text-white mt-1">0</p>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl text-center border-l-4 border-l-pink-500">
+                            <p class="text-[10px] uppercase font-bold text-pink-400">Follow-up</p>
+                            <p id="funnel-followup" class="text-2xl font-black text-white mt-1">0</p>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl text-center border-l-4 border-l-emerald-500">
+                            <p class="text-[10px] uppercase font-bold text-emerald-400">Won Client</p>
+                            <p id="funnel-won" class="text-2xl font-black text-white mt-1">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Business Summary Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-card p-6 rounded-2xl">
+                            <h3 class="font-bold text-white text-sm mb-4">Website Design Performance</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs text-slate-300 mb-1">
+                                        <span>Demo Websites Built</span>
+                                        <span id="biz-demos-count" class="font-bold text-brand-400">0</span>
+                                    </div>
+                                    <div class="w-full bg-slate-800 rounded-full h-2">
+                                        <div id="biz-demos-bar" class="bg-brand-500 h-2 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs text-slate-300 mb-1">
+                                        <span>Lead Response Rate</span>
+                                        <span id="biz-response-rate" class="font-bold text-emerald-400">0%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-800 rounded-full h-2">
+                                        <div id="biz-response-bar" class="bg-emerald-500 h-2 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs text-slate-300 mb-1">
+                                        <span>Conversion Rate (Won/Total)</span>
+                                        <span id="biz-conversion-rate" class="font-bold text-purple-400">0%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-800 rounded-full h-2">
+                                        <div id="biz-conversion-bar" class="bg-purple-500 h-2 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-6 rounded-2xl flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-white text-sm mb-2">Monthly Revenue Target</h3>
+                                <p class="text-xs text-slate-400 mb-4">Target: ₹100,000 / month from Website Design clients.</p>
+                                <div class="text-3xl font-extrabold text-emerald-400" id="biz-monthly-rev">₹0</div>
+                                <p class="text-xs text-slate-500 mt-1">Earned this calendar month</p>
+                            </div>
+                            <div class="pt-4 border-t border-slate-800">
+                                <button onclick="openModal('lead')" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-plus text-brand-emerald"></i> Add New Website Client Prospect
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. CLIENT OUTREACH (CRM) VIEW -->
+                <div id="view-outreach" class="tab-content space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-800">
+                        <div>
+                            <h2 class="text-xl font-bold text-white">Client Outreach & CRM</h2>
+                            <p class="text-xs text-slate-400">Track prospective businesses, follow-ups, and demo delivery status.</p>
+                        </div>
+                        <button onclick="openModal('lead')" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                            <i class="fa-solid fa-plus"></i> Add Client Prospect
+                        </button>
+                    </div>
+
+                    <!-- Search & Filters -->
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
+                            <input type="text" id="crm-search" oninput="renderOutreachTable()" placeholder="Search business, name, or location..." class="w-full glass-input rounded-xl pl-9 pr-4 py-2 text-xs">
+                        </div>
+                        <select id="crm-filter-status" onchange="renderOutreachTable()" class="glass-input rounded-xl px-3 py-2 text-xs">
+                            <option value="ALL">All Statuses</option>
+                            <option value="New Lead">New Lead</option>
+                            <option value="Contacted">Contacted</option>
+                            <option value="Replied">Replied</option>
+                            <option value="Interested">Interested</option>
+                            <option value="Demo Sent">Demo Sent</option>
+                            <option value="Follow-up">Follow-up</option>
+                            <option value="Won">Won</option>
+                            <option value="Lost">Lost</option>
+                        </select>
+                    </div>
+
+                    <!-- Datatable -->
+                    <div class="glass-card rounded-2xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-900/80 uppercase text-slate-400 font-semibold border-b border-slate-800">
+                                    <tr>
+                                        <th class="p-3.5">Client & Business</th>
+                                        <th class="p-3.5">Type & Location</th>
+                                        <th class="p-3.5">Contact Details</th>
+                                        <th class="p-3.5">Status</th>
+                                        <th class="p-3.5">Demo & Follow-up</th>
+                                        <th class="p-3.5">Value</th>
+                                        <th class="p-3.5 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="crm-table-body" class="divide-y divide-slate-800/60">
+                                    <!-- Dynamic CRM JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. INCOME TRACKER VIEW -->
+                <div id="view-income" class="tab-content space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-800">
+                        <div>
+                            <h2 class="text-xl font-bold text-white">Income & Revenue Tracker</h2>
+                            <p class="text-xs text-slate-400">Keep exact track of website design payments and business revenue.</p>
+                        </div>
+                        <button onclick="openModal('income')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                            <i class="fa-solid fa-plus"></i> Record Income
+                        </button>
+                    </div>
+
+                    <!-- Revenue Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="glass-card p-4 rounded-xl">
+                            <p class="text-xs text-slate-400">Today</p>
+                            <p id="inc-today" class="text-2xl font-bold text-white mt-1">₹0</p>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl">
+                            <p class="text-xs text-slate-400">This Week</p>
+                            <p id="inc-week" class="text-2xl font-bold text-white mt-1">₹0</p>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl">
+                            <p class="text-xs text-slate-400">This Month</p>
+                            <p id="inc-month" class="text-2xl font-bold text-white mt-1">₹0</p>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl">
+                            <p class="text-xs text-slate-400">Total Revenue</p>
+                            <p id="inc-total" class="text-2xl font-bold text-emerald-400 mt-1">₹0</p>
+                        </div>
+                    </div>
+
+                    <!-- Income Chart -->
+                    <div class="glass-card p-6 rounded-2xl">
+                        <h3 class="font-bold text-white text-sm mb-4">Monthly Income Trend</h3>
+                        <div class="h-64 relative">
+                            <canvas id="incomeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Income Log Table -->
+                    <div class="glass-card rounded-2xl overflow-hidden">
+                        <div class="p-4 border-b border-slate-800">
+                            <h3 class="font-bold text-white text-sm">Transaction History</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-900/80 uppercase text-slate-400 font-semibold border-b border-slate-800">
+                                    <tr>
+                                        <th class="p-3.5">Date</th>
+                                        <th class="p-3.5">Client Name</th>
+                                        <th class="p-3.5">Service Provided</th>
+                                        <th class="p-3.5">Amount</th>
+                                        <th class="p-3.5">Status</th>
+                                        <th class="p-3.5 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="income-table-body" class="divide-y divide-slate-800/60">
+                                    <!-- JS Dynamic Income Log -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. LEARNING TRACKER VIEW -->
+                <div id="view-learning" class="tab-content space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-800">
+                        <div>
+                            <h2 class="text-xl font-bold text-white">Personal Learning & Skill Growth</h2>
+                            <p class="text-xs text-slate-400">Track hours invested in web design trends, AI tools, and trading.</p>
+                        </div>
+                        <button onclick="openModal('learning')" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                            <i class="fa-solid fa-plus"></i> Add Learning Goal
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Left 2 Cols: Learning Goals Cards -->
+                        <div id="learning-goals-list" class="lg:col-span-2 space-y-4">
+                            <!-- JS dynamic learning goals -->
+                        </div>
+
+                        <!-- Right Chart -->
+                        <div class="glass-card p-6 rounded-2xl">
+                            <h3 class="font-bold text-white text-sm mb-4">Hours Studied by Skill</h3>
+                            <div class="h-64 relative">
+                                <canvas id="learningChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. NOTES & IDEAS VIEW -->
+                <div id="view-notes" class="tab-content space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-800">
+                        <div>
+                            <h2 class="text-xl font-bold text-white">Notes, Ideas & Strategy</h2>
+                            <p class="text-xs text-slate-400">Organize client project notes, business concepts, and plans.</p>
+                        </div>
+                        <button onclick="openModal('note')" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                            <i class="fa-solid fa-plus"></i> New Note
+                        </button>
+                    </div>
+
+                    <!-- Category Filter Tabs -->
+                    <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-2">
+                        <button onclick="filterNotes('ALL')" class="note-tab-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600/30 text-brand-400 border border-brand-500/30">All Notes</button>
+                        <button onclick="filterNotes('Important')" class="note-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Important</button>
+                        <button onclick="filterNotes('Ideas')" class="note-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Ideas</button>
+                        <button onclick="filterNotes('Client Notes')" class="note-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Client Notes</button>
+                        <button onclick="filterNotes('Business Ideas')" class="note-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Business Ideas</button>
+                        <button onclick="filterNotes('Tomorrow\'s Plan')" class="note-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Tomorrow's Plan</button>
+                    </div>
+
+                    <!-- Notes Grid -->
+                    <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- JS Dynamic Notes -->
+                    </div>
+                </div>
+
+                <!-- 9. PRODUCTIVITY ANALYTICS VIEW -->
+                <div id="view-analytics" class="tab-content space-y-6">
+                    <div class="pb-4 border-b border-slate-800">
+                        <h2 class="text-xl font-bold text-white">Productivity Analytics</h2>
+                        <p class="text-xs text-slate-400">In-depth breakdown of work execution performance.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="glass-card p-6 rounded-2xl">
+                            <h3 class="font-bold text-white text-sm mb-4">Task Completion Analytics</h3>
+                            <div class="h-64 relative">
+                                <canvas id="analyticsTaskChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-6 rounded-2xl">
+                            <h3 class="font-bold text-white text-sm mb-4">Client Outreach Velocity</h3>
+                            <div class="h-64 relative">
+                                <canvas id="analyticsOutreachChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 10. SETTINGS VIEW -->
+                <div id="view-settings" class="tab-content space-y-6">
+                    <div class="pb-4 border-b border-slate-800">
+                        <h2 class="text-xl font-bold text-white">Settings & Data Control</h2>
+                        <p class="text-xs text-slate-400">Manage your profile and data backups.</p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl max-w-xl space-y-6">
+                        <div>
+                            <h3 class="font-bold text-white text-sm mb-1">Profile Info</h3>
+                            <div class="space-y-3 mt-3">
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Name</label>
+                                    <input type="text" id="setting-name" value="Ranjan" class="w-full glass-input rounded-xl p-2.5 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Title</label>
+                                    <input type="text" id="setting-title" value="Website Designer" class="w-full glass-input rounded-xl p-2.5 text-xs">
+                                </div>
+                                <button onclick="saveProfileSettings()" class="px-4 py-2 bg-brand-600 text-white text-xs font-semibold rounded-xl">Save Profile</button>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-800">
+                            <h3 class="font-bold text-rose-400 text-sm mb-1">Data Management</h3>
+                            <p class="text-xs text-slate-400 mb-3">Clear data or restore state.</p>
+                            <div class="flex gap-3">
+                                <button onclick="exportData()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700">Export Backup JSON</button>
+                                <button onclick="resetAllData()" class="px-4 py-2 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 text-xs font-semibold rounded-xl border border-rose-500/30">Reset All Data</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- GLOBAL MODAL OVERLAY -->
+    <div id="modalOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card max-w-lg w-full rounded-2xl border border-slate-700 p-6 shadow-2xl relative animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="modalContainer">
+                <!-- JS Dynamic Form Content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APP STATE & LOGIC -->
+    <script>
+        // -------------------------------------------------------------
+        // APPLICATION STATE MANAGEMENT
+        // -------------------------------------------------------------
+        const DEFAULT_STATE = {
+            profile: { name: 'Ranjan', title: 'Website Designer' },
+            selectedDate: new Date().toISOString().split('T')[0],
+            streak: { current: 0, best: 0, lastCheckInDate: null },
+            priorities: [], // { id, title, category, priority, estTime, completed, date }
+            routines: [],   // { id, time, activity, category, status, recurring }
+            leads: [],      // { id, clientName, businessName, businessType, location, contact, dateContacted, status, demoSent, followUpDate, potentialValue, notes }
+            income: [],     // { id, date, client, service, amount, paymentStatus, notes }
+            learning: [],   // { id, category, goal, timeStudied, progress, notes }
+            notes: [],      // { id, category, title, content, isPinned, date }
+            dailyReviews: {} // { 'YYYY-MM-DD': { q1, q2, q3, q4, q5 } }
+        };
+
+        let AppState = JSON.parse(localStorage.getItem('RANJAN_COMMAND_CENTER_STATE')) || DEFAULT_STATE;
+
+        function saveState() {
+            localStorage.setItem('RANJAN_COMMAND_CENTER_STATE', JSON.stringify(AppState));
+            renderAllViews();
+        }
+
+        // Initialize Date Picker
+        const datePicker = document.getElementById('datePicker');
+        datePicker.value = AppState.selectedDate || new Date().toISOString().split('T')[0];
+        datePicker.addEventListener('change', (e) => {
+            AppState.selectedDate = e.target.value;
+            saveState();
+        });
+
+        // -------------------------------------------------------------
+        // NAVIGATION HANDLER
+        // -------------------------------------------------------------
+        const navItems = document.querySelectorAll('.nav-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetTab = item.getAttribute('data-tab');
+
+                navItems.forEach(n => {
+                    n.classList.remove('active', 'bg-brand-600/20', 'border', 'border-brand-500/30', 'text-white');
+                    n.classList.add('text-slate-400');
+                });
+                item.classList.add('active', 'bg-brand-600/20', 'border', 'border-brand-500/30', 'text-white');
+                item.classList.remove('text-slate-400');
+
+                tabContents.forEach(tc => {
+                    tc.classList.remove('active');
+                    if (tc.id === `view-${targetTab}`) tc.classList.add('active');
+                });
+
+                // Re-render charts on view activation
+                if (targetTab === 'income') renderIncomeChart();
+                if (targetTab === 'learning') renderLearningChart();
+                if (targetTab === 'analytics') renderAnalyticsCharts();
+
+                // Close mobile sidebar if open
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            });
+        });
+
+        // Mobile Sidebar Toggles
+        document.getElementById('openSidebarBtn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+        });
+        document.getElementById('closeSidebarBtn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+        });
+
+        // -------------------------------------------------------------
+        // MODAL MANAGEMENT
+        // -------------------------------------------------------------
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalContainer = document.getElementById('modalContainer');
+
+        function openModal(type, editId = null) {
+            modalOverlay.classList.remove('hidden');
+            let content = '';
+
+            if (type === 'task') {
+                const item = editId ? AppState.priorities.find(p => p.id === editId) : null;
+                content = `
+                    <h3 class="text-base font-bold text-white mb-4">${item ? 'Edit' : 'Add'} Priority Task</h3>
+                    <form onsubmit="handleTaskSubmit(event, '${editId || ''}')" class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Task Title</label>
+                            <input type="text" id="task-title" required value="${item ? item.title : ''}" class="w-full glass-input rounded-xl p-2.5 text-xs" placeholder="e.g. Build premium hero section demo">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Category</label>
+                                <select id="task-cat" class="w-full glass-input rounded-xl p-2.5 text-xs">
+                                    <option ${item && item.category === 'Website Design' ? 'selected' : ''}>Website Design</option>
+                                    <option ${item && item.category === 'Client Outreach' ? 'selected' : ''}>Client Outreach</option>
+                                    <option ${item && item.category === 'Learning' ? 'selected' : ''}>Learning</option>
+                                    <option ${item && item.category === 'Personal' ? 'selected' : ''}>Personal</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Priority</label>
+                                <select id="task-prio" class="w-full glass-input rounded-xl p-2.5 text-xs">
+                                    <option ${item && item.priority === 'High' ? 'selected' : ''}>High</option>
+                                    <option ${item && item.priority === 'Medium' ? 'selected' : ''}>Medium</option>
+                                    <option ${item && item.priority === 'Low' ? 'selected' : ''}>Low</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Est. Time (e.g. 2 hrs)</label>
+                            <input type="text" id="task-time" value="${item ? item.estTime : '1 hr'}" class="w-full glass-input rounded-xl p-2.5 text-xs">
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl text-xs mt-2">Save Task</button>
+                    </form>
+                `;
+            } else if (type === 'lead') {
+                const item = editId ? AppState.leads.find(l => l.id === editId) : null;
+                content = `
+                    <h3 class="text-base font-bold text-white mb-4">${item ? 'Edit' : 'Add'} Client Outreach Prospect</h3>
+                    <form onsubmit="handleLeadSubmit(event, '${editId || ''}')" class="space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">Client Name</label>
+                                <input type="text" id="lead-name" required value="${item ? item.clientName : ''}" class="w-full glass-input rounded-xl p-2 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">Business Name</label>
+                                <input type="text" id="lead-biz" required value="${item ? item.businessName : ''}" class="w-full glass-input rounded-xl p-2 text-xs">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">Business Type</label>
+                                <input type="text" id="lead-type" value="${item ? item.businessType : 'Gym / Restaurant'}" class="w-full glass-input rounded-xl p-2 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">Location</label>
+                                <input type="text" id="lead-loc" value="${item ? item.location : 'Mumbai / Remote'}" class="w-full glass-input rounded-xl p-2 text-xs">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">Contact (Phone/Email)</label>
+                                <input type="text" id="lead-contact" value="${item ? item.contact : ''}" class="w-full glass-input rounded-xl p-2 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">Status</label>
+                                <select id="lead-status" class="w-full glass-input rounded-xl p-2 text-xs">
+                                    <option ${item && item.status === 'New Lead' ? 'selected' : ''}>New Lead</option>
+                                    <option ${item && item.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
+                                    <option ${item && item.status === 'Replied' ? 'selected' : ''}>Replied</option>
+                                    <option ${item && item.status === 'Interested' ? 'selected' : ''}>Interested</option>
+                                    <option ${item && item.status === 'Demo Sent' ? 'selected' : ''}>Demo Sent</option>
+                                    <option ${item && item.status === 'Follow-up' ? 'selected' : ''}>Follow-up</option>
+                                    <option ${item && item.status === 'Won' ? 'selected' : ''}>Won</option>
+                                    <option ${item && item.status === 'Lost' ? 'selected' : ''}>Lost</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">Potential Value (₹)</label>
+                                <input type="number" id="lead-val" value="${item ? item.potentialValue : 15000}" class="w-full glass-input rounded-xl p-2 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">Follow-up Date</label>
+                                <input type="date" id="lead-follow" value="${item ? item.followUpDate : ''}" class="w-full glass-input rounded-xl p-2 text-xs">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-brand-600 text-white font-semibold rounded-xl text-xs mt-2">Save Client Lead</button>
+                    </form>
+                `;
+            } else if (type === 'income') {
+                content = `
+                    <h3 class="text-base font-bold text-white mb-4">Record New Income</h3>
+                    <form onsubmit="handleIncomeSubmit(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">Client Name</label>
+                            <input type="text" id="inc-client" required class="w-full glass-input rounded-xl p-2.5 text-xs" placeholder="Client Name / Business">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">Service Delivered</label>
+                            <input type="text" id="inc-service" required class="w-full glass-input rounded-xl p-2.5 text-xs" placeholder="e.g. Website Redesign + Hosting">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">Amount (₹)</label>
+                                <input type="number" id="inc-amt" required class="w-full glass-input rounded-xl p-2.5 text-xs" placeholder="15000">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">Date Received</label>
+                                <input type="date" id="inc-date" value="${AppState.selectedDate}" class="w-full glass-input rounded-xl p-2.5 text-xs">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-emerald-600 text-white font-semibold rounded-xl text-xs mt-2">Save Income Entry</button>
+                    </form>
+                `;
+            } else if (type === 'routine') {
+                content = `
+                    <h3 class="text-base font-bold text-white mb-4">Add Routine Time Block</h3>
+                    <form onsubmit="handleRoutineSubmit(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">Time Range (e.g. 08:00 AM - 10:00 AM)</label>
+                            <input type="text" id="rt-time" required class="w-full glass-input rounded-xl p-2.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">Activity</label>
+                            <input type="text" id="rt-act" required class="w-full glass-input rounded-xl p-2.5 text-xs" placeholder="e.g. Website Designing">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">Category</label>
+                            <select id="rt-cat" class="w-full glass-input rounded-xl p-2.5 text-xs">
+                                <option>Core Work</option>
+                                <option>Outreach</option>
+                                <option>Learning</option>
+                                <option>Health / Wellness</option>
+                                <option>Planning</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-brand-600 text-white font-semibold rounded-xl text-xs mt-2">Save Routine Block</button>
+                    </form>
+                `;
+            } else if (type === 'note') {
+                content = `
+                    <h3 class="text-base font-bold text-white mb-4">Add Quick Note</h3>
+                    <form onsubmit="handleNoteSubmit(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">Note Title</label>
+                            <input type="text" id="note-title" required class="w-full glass-input rounded-xl p-2.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">Category</label>
+                            <select id="note-cat" class="w-full glass-input rounded-xl p-2.5 text-xs">
+                                <option>Important</option>
+                                <option>Ideas</option>
+                                <option>Client Notes</option>
+                                <option>Business Ideas</option>
+                                <option>Tomorrow's Plan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">Content</label>
+                            <textarea id="note-content" rows="3" required class="w-full glass-input rounded-xl p-2.5 text-xs"></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-brand-600 text-white font-semibold rounded-xl text-xs mt-2">Save Note</button>
+                    </form>
+                `;
+            } else if (type === 'learning') {
+                content = `
+                    <h3 class="text-base font-bold text-white mb-4">Add Learning Goal</h3>
+                    <form onsubmit="handleLearningSubmit(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">Goal / Skill Name</label>
+                            <input type="text" id="learn-goal" required class="w-full glass-input rounded-xl p-2.5 text-xs" placeholder="e.g. Master Framer & Three.js">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">Category</label>
+                                <select id="learn-cat" class="w-full glass-input rounded-xl p-2.5 text-xs">
+                                    <option>Website Design</option>
+                                    <option>AI Tools</option>
+                                    <option>Digital Marketing</option>
+                                    <option>Trading</option>
+                                    <option>Business</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">Time Studied (hrs)</label>
+                                <input type="number" id="learn-hours" value="0" class="w-full glass-input rounded-xl p-2.5 text-xs">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">Progress %</label>
+                            <input type="number" id="learn-prog" value="0" min="0" max="100" class="w-full glass-input rounded-xl p-2.5 text-xs">
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-brand-600 text-white font-semibold rounded-xl text-xs mt-2">Save Skill Goal</button>
+                    </form>
+                `;
+            }
+
+            modalContainer.innerHTML = content;
+        }
+
+        function closeModal() {
+            modalOverlay.classList.add('hidden');
+        }
+
+        // -------------------------------------------------------------
+        // EVENT HANDLERS FOR FORMS
+        // -------------------------------------------------------------
+        function handleTaskSubmit(e, editId) {
+            e.preventDefault();
+            const title = document.getElementById('task-title').value;
+            const category = document.getElementById('task-cat').value;
+            const priority = document.getElementById('task-prio').value;
+            const estTime = document.getElementById('task-time').value;
+
+            if (editId) {
+                const task = AppState.priorities.find(p => p.id === editId);
+                if (task) {
+                    task.title = title;
+                    task.category = category;
+                    task.priority = priority;
+                    task.estTime = estTime;
+                }
+            } else {
+                AppState.priorities.push({
+                    id: 't_' + Date.now(),
+                    title, category, priority, estTime,
+                    completed: false,
+                    date: AppState.selectedDate
+                });
+            }
+            saveState();
+            closeModal();
+        }
+
+        function toggleTaskComplete(id) {
+            const task = AppState.priorities.find(p => p.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveState();
+            }
+        }
+
+        function deleteTask(id) {
+            AppState.priorities = AppState.priorities.filter(p => p.id !== id);
+            saveState();
+        }
+
+        function handleLeadSubmit(e, editId) {
+            e.preventDefault();
+            const clientName = document.getElementById('lead-name').value;
+            const businessName = document.getElementById('lead-biz').value;
+            const businessType = document.getElementById('lead-type').value;
+            const location = document.getElementById('lead-loc').value;
+            const contact = document.getElementById('lead-contact').value;
+            const status = document.getElementById('lead-status').value;
+            const potentialValue = parseFloat(document.getElementById('lead-val').value) || 0;
+            const followUpDate = document.getElementById('lead-follow').value;
+
+            if (editId) {
+                const lead = AppState.leads.find(l => l.id === editId);
+                if (lead) {
+                    Object.assign(lead, { clientName, businessName, businessType, location, contact, status, potentialValue, followUpDate });
+                }
+            } else {
+                AppState.leads.push({
+                    id: 'l_' + Date.now(),
+                    clientName, businessName, businessType, location, contact,
+                    dateContacted: AppState.selectedDate,
+                    status, demoSent: status === 'Demo Sent', followUpDate, potentialValue, notes: ''
+                });
+            }
+            saveState();
+            closeModal();
+        }
+
+        function deleteLead(id) {
+            AppState.leads = AppState.leads.filter(l => l.id !== id);
+            saveState();
+        }
+
+        function handleIncomeSubmit(e) {
+            e.preventDefault();
+            AppState.income.push({
+                id: 'inc_' + Date.now(),
+                client: document.getElementById('inc-client').value,
+                service: document.getElementById('inc-service').value,
+                amount: parseFloat(document.getElementById('inc-amt').value) || 0,
+                date: document.getElementById('inc-date').value,
+                paymentStatus: 'Received'
+            });
+            saveState();
+            closeModal();
+        }
+
+        function deleteIncome(id) {
+            AppState.income = AppState.income.filter(i => i.id !== id);
+            saveState();
+        }
+
+        function handleRoutineSubmit(e) {
+            e.preventDefault();
+            AppState.routines.push({
+                id: 'rt_' + Date.now(),
+                time: document.getElementById('rt-time').value,
+                activity: document.getElementById('rt-act').value,
+                category: document.getElementById('rt-cat').value,
+                completed: false
+            });
+            saveState();
+            closeModal();
+        }
+
+        function toggleRoutineComplete(id) {
+            const rt = AppState.routines.find(r => r.id === id);
+            if (rt) {
+                rt.completed = !rt.completed;
+                saveState();
+            }
+        }
+
+        function deleteRoutine(id) {
+            AppState.routines = AppState.routines.filter(r => r.id !== id);
+            saveState();
+        }
+
+        function handleNoteSubmit(e) {
+            e.preventDefault();
+            AppState.notes.push({
+                id: 'n_' + Date.now(),
+                title: document.getElementById('note-title').value,
+                category: document.getElementById('note-cat').value,
+                content: document.getElementById('note-content').value,
+                isPinned: false,
+                date: AppState.selectedDate
+            });
+            saveState();
+            closeModal();
+        }
+
+        function deleteNote(id) {
+            AppState.notes = AppState.notes.filter(n => n.id !== id);
+            saveState();
+        }
+
+        function togglePinNote(id) {
+            const n = AppState.notes.find(x => x.id === id);
+            if (n) {
+                n.isPinned = !n.isPinned;
+                saveState();
+            }
+        }
+
+        function handleLearningSubmit(e) {
+            e.preventDefault();
+            AppState.learning.push({
+                id: 'learn_' + Date.now(),
+                goal: document.getElementById('learn-goal').value,
+                category: document.getElementById('learn-cat').value,
+                timeStudied: parseFloat(document.getElementById('learn-hours').value) || 0,
+                progress: parseFloat(document.getElementById('learn-prog').value) || 0
+            });
+            saveState();
+            closeModal();
+        }
+
+        function handleDailyReviewSubmit(e) {
+            e.preventDefault();
+            const dateStr = AppState.selectedDate;
+            AppState.dailyReviews[dateStr] = {
+                q1: document.getElementById('review-q1').value,
+                q2: document.getElementById('review-q2').value,
+                q3: document.getElementById('review-q3').value,
+                q4: document.getElementById('review-q4').value,
+                q5: document.getElementById('review-q5').value
+            };
+
+            // Streak Update logic
+            if (AppState.streak.lastCheckInDate !== dateStr) {
+                AppState.streak.current += 1;
+                if (AppState.streak.current > AppState.streak.best) {
+                    AppState.streak.best = AppState.streak.current;
+                }
+                AppState.streak.lastCheckInDate = dateStr;
+            }
+
+            saveState();
+            alert('Daily Review Saved & Streak Updated!');
+        }
+
+        function saveProfileSettings() {
+            AppState.profile.name = document.getElementById('setting-name').value;
+            AppState.profile.title = document.getElementById('setting-title').value;
+            saveState();
+            alert('Profile updated');
+        }
+
+        function resetAllData() {
+            if (confirm('Are you sure you want to reset all dashboard data?')) {
+                localStorage.removeItem('RANJAN_COMMAND_CENTER_STATE');
+                AppState = DEFAULT_STATE;
+                saveState();
+            }
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(AppState));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `Ranjan_Command_Center_Backup_${AppState.selectedDate}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // -------------------------------------------------------------
+        // RENDER FUNCTIONS FOR ALL SECTIONS
+        // -------------------------------------------------------------
+        function renderAllViews() {
+            renderDashboard();
+            renderRoutine();
+            renderTasks();
+            renderBusiness();
+            renderOutreachTable();
+            renderIncome();
+            renderLearning();
+            renderNotes();
+        }
+
+        // 1. DASHBOARD RENDERER
+        function renderDashboard() {
+            const todaysTasks = AppState.priorities.filter(p => p.date === AppState.selectedDate);
+            const completedTasks = todaysTasks.filter(p => p.completed).length;
+            const totalTasks = todaysTasks.length;
+            const taskPct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+            document.getElementById('kpi-tasks').innerText = `${completedTasks} / ${totalTasks}`;
+            document.getElementById('kpi-tasks-pct').innerText = `${taskPct}% Completed`;
+            document.getElementById('kpi-tasks-bar').style.width = `${taskPct}%`;
+
+            // Productivity Rate (Tasks + Routine completion combined)
+            const todaysRoutines = AppState.routines;
+            const completedRoutines = todaysRoutines.filter(r => r.completed).length;
+            const totalRoutineCount = todaysRoutines.length;
+            const totalItems = totalTasks + totalRoutineCount;
+            const completedItems = completedTasks + completedRoutines;
+            const prodPct = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
+            document.getElementById('kpi-productivity').innerText = `${prodPct}%`;
+            document.getElementById('kpi-productivity-bar').style.width = `${prodPct}%`;
+
+            // Client Leads KPI
+            document.getElementById('kpi-leads').innerText = AppState.leads.length;
+            document.getElementById('kpi-leads-bar').style.width = `${Math.min(AppState.leads.length * 10, 100)}%`;
+
+            // Today's Income
+            const todayIncTotal = AppState.income
+                .filter(i => i.date === AppState.selectedDate)
+                .reduce((acc, curr) => acc + curr.amount, 0);
+            document.getElementById('kpi-income').innerText = `₹${todayIncTotal.toLocaleString('en-IN')}`;
+            document.getElementById('kpi-income-bar').style.width = `${Math.min((todayIncTotal / 5000) * 100, 100)}%`;
+
+            // Streak
+            document.getElementById('streak-current').innerText = `${AppState.streak.current} Days`;
+            document.getElementById('streak-best').innerText = `${AppState.streak.best} Days`;
+
+            // Render Top 3 Priorities on Dashboard
+            const dashPrioritiesContainer = document.getElementById('dashboard-priorities-list');
+            if (todaysTasks.length === 0) {
+                dashPrioritiesContainer.innerHTML = `
+                    <div class="text-center py-6 text-slate-500 text-xs">
+                        No priorities added for today (${AppState.selectedDate}). Click "+ Add Priority" to set goals.
+                    </div>`;
+            } else {
+                dashPrioritiesContainer.innerHTML = todaysTasks.map(t => `
+                    <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTaskComplete('${t.id}')" class="custom-checkbox">
+                            <div>
+                                <p class="text-xs font-semibold ${t.completed ? 'line-through text-slate-500' : 'text-white'}">${t.title}</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[10px] px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 font-medium">${t.category}</span>
+                                    <span class="text-[10px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${t.estTime}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-1 rounded ${t.priority === 'High' ? 'bg-rose-500/10 text-rose-400' : 'bg-slate-800 text-slate-300'}">${t.priority}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Load saved Daily Review for selected date
+            const reviewObj = AppState.dailyReviews[AppState.selectedDate] || {};
+            document.getElementById('review-q1').value = reviewObj.q1 || '';
+            document.getElementById('review-q2').value = reviewObj.q2 || '';
+            document.getElementById('review-q3').value = reviewObj.q3 || '';
+            document.getElementById('review-q4').value = reviewObj.q4 || '';
+            document.getElementById('review-q5').value = reviewObj.q5 || '';
+        }
+
+        // 2. MY ROUTINE RENDERER
+        function renderRoutine() {
+            const body = document.getElementById('routine-table-body');
+            if (AppState.routines.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-500">No daily routine blocks configured yet. Click "+ Add Time Block".</td></tr>`;
+                return;
+            }
+            body.innerHTML = AppState.routines.map(r => `
+                <tr class="hover:bg-slate-800/30">
+                    <td class="p-4 font-mono text-brand-400 font-semibold">${r.time}</td>
+                    <td class="p-4 font-semibold text-white ${r.completed ? 'line-through text-slate-500' : ''}">${r.activity}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 text-[10px] font-medium">${r.category}</span></td>
+                    <td class="p-4">
+                        <button onclick="toggleRoutineComplete('${r.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${r.completed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">
+                            ${r.completed ? 'Completed' : 'Pending'}
+                        </button>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button onclick="deleteRoutine('${r.id}')" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 3. TASKS RENDERER
+        let taskFilterMode = 'all';
+        function filterTasks(mode) {
+            taskFilterMode = mode;
+            document.querySelectorAll('.task-filter-btn').forEach(b => {
+                b.classList.remove('bg-brand-600/30', 'text-brand-400', 'border', 'border-brand-500/30');
+                b.classList.add('text-slate-400');
+            });
+            event.target.classList.add('bg-brand-600/30', 'text-brand-400', 'border', 'border-brand-500/30');
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('all-tasks-container');
+            let list = AppState.priorities;
+            if (taskFilterMode === 'pending') list = list.filter(t => !t.completed);
+            if (taskFilterMode === 'completed') list = list.filter(t => t.completed);
+
+            if (list.length === 0) {
+                container.innerHTML = `<div class="glass-card p-8 text-center text-slate-500 text-xs">No tasks match current filter.</div>`;
+                return;
+            }
+
+            container.innerHTML = list.map(t => `
+                <div class="glass-card p-4 rounded-xl flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTaskComplete('${t.id}')" class="custom-checkbox">
+                        <div>
+                            <p class="text-xs font-semibold ${t.completed ? 'line-through text-slate-500' : 'text-white'}">${t.title}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] text-slate-400 font-medium">${t.category}</span>
+                                <span class="text-[10px] text-slate-500">• Date: ${t.date}</span>
+                                <span class="text-[10px] text-slate-500">• Est: ${t.estTime}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded ${t.priority === 'High' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-slate-800 text-slate-300'}">${t.priority}</span>
+                        <button onclick="openModal('task', '${t.id}')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteTask('${t.id}')" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 4. BUSINESS & FUNNEL RENDERER
+        function renderBusiness() {
+            const leads = AppState.leads;
+            const countByStatus = (st) => leads.filter(l => l.status === st).length;
+
+            document.getElementById('funnel-leads').innerText = countByStatus('New Lead');
+            document.getElementById('funnel-contacted').innerText = countByStatus('Contacted');
+            document.getElementById('funnel-replied').innerText = countByStatus('Replied');
+            document.getElementById('funnel-demo').innerText = countByStatus('Demo Sent');
+            document.getElementById('funnel-followup').innerText = countByStatus('Follow-up');
+            document.getElementById('funnel-won').innerText = countByStatus('Won');
+
+            // Quick View Stats
+            document.getElementById('quick-demos-sent').innerText = countByStatus('Demo Sent');
+            
+            const totalPipelineVal = leads.reduce((acc, curr) => acc + (curr.potentialValue || 0), 0);
+            document.getElementById('quick-pipeline-value').innerText = `₹${totalPipelineVal.toLocaleString('en-IN')}`;
+
+            // Calculation rates
+            const totalOutreach = leads.length;
+            const repliedCount = countByStatus('Replied') + countByStatus('Demo Sent') + countByStatus('Won');
+            const respRate = totalOutreach > 0 ? Math.round((repliedCount / totalOutreach) * 100) : 0;
+            const wonCount = countByStatus('Won');
+            const convRate = totalOutreach > 0 ? Math.round((wonCount / totalOutreach) * 100) : 0;
+
+            document.getElementById('biz-demos-count').innerText = countByStatus('Demo Sent');
+            document.getElementById('biz-demos-bar').style.width = `${Math.min(countByStatus('Demo Sent') * 10, 100)}%`;
+
+            document.getElementById('biz-response-rate').innerText = `${respRate}%`;
+            document.getElementById('biz-response-bar').style.width = `${respRate}%`;
+
+            document.getElementById('biz-conversion-rate').innerText = `${convRate}%`;
+            document.getElementById('biz-conversion-bar').style.width = `${convRate}%`;
+
+            // Month Income Calculation
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const monthIncome = AppState.income
+                .filter(i => i.date.startsWith(currentMonth))
+                .reduce((acc, curr) => acc + curr.amount, 0);
+
+            document.getElementById('biz-monthly-rev').innerText = `₹${monthIncome.toLocaleString('en-IN')}`;
+            document.getElementById('quick-month-income').innerText = `₹${monthIncome.toLocaleString('en-IN')}`;
+        }
+
+        // 5. CLIENT OUTREACH (CRM) RENDERER
+        function renderOutreachTable() {
+            const body = document.getElementById('crm-table-body');
+            const searchVal = document.getElementById('crm-search').value.toLowerCase();
+            const statusFilter = document.getElementById('crm-filter-status').value;
+
+            let leads = AppState.leads.filter(l => {
+                const matchesSearch = l.clientName.toLowerCase().includes(searchVal) ||
+                                      l.businessName.toLowerCase().includes(searchVal) ||
+                                      l.location.toLowerCase().includes(searchVal);
+                const matchesStatus = statusFilter === 'ALL' || l.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            if (leads.length === 0) {
+                body.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-500">No client prospects found. Click "+ Add Client Prospect" to populate CRM.</td></tr>`;
+                return;
+            }
+
+            body.innerHTML = leads.map(l => `
+                <tr class="hover:bg-slate-800/30">
+                    <td class="p-3.5">
+                        <p class="font-bold text-white">${l.businessName}</p>
+                        <p class="text-[10px] text-slate-400">${l.clientName}</p>
+                    </td>
+                    <td class="p-3.5">
+                        <p class="text-slate-300">${l.businessType}</p>
+                        <p class="text-[10px] text-slate-500"><i class="fa-solid fa-location-dot mr-1"></i>${l.location}</p>
+                    </td>
+                    <td class="p-3.5 text-slate-300 font-mono text-[11px]">${l.contact || 'N/A'}</td>
+                    <td class="p-3.5">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                            l.status === 'Won' ? 'bg-emerald-500/20 text-emerald-400' :
+                            l.status === 'Demo Sent' ? 'bg-amber-500/20 text-amber-400' :
+                            l.status === 'Contacted' ? 'bg-blue-500/20 text-blue-400' :
+                            'bg-slate-800 text-slate-300'
+                        }">${l.status}</span>
+                    </td>
+                    <td class="p-3.5">
+                        <p class="text-slate-300 font-medium">${l.demoSent ? '✅ Demo Sent' : '❌ No Demo'}</p>
+                        <p class="text-[10px] text-slate-500">${l.followUpDate ? 'Follow-up: ' + l.followUpDate : 'No date'}</p>
+                    </td>
+                    <td class="p-3.5 font-bold text-emerald-400">₹${(l.potentialValue || 0).toLocaleString('en-IN')}</td>
+                    <td class="p-3.5 text-right space-x-2">
+                        <button onclick="openModal('lead', '${l.id}')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteLead('${l.id}')" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 6. INCOME TRACKER RENDERER & CHART
+        let incomeChartInstance = null;
+        function renderIncome() {
+            const todayStr = AppState.selectedDate;
+            const incToday = AppState.income.filter(i => i.date === todayStr).reduce((a, b) => a + b.amount, 0);
+            
+            // Calc Total Revenue
+            const incTotal = AppState.income.reduce((a, b) => a + b.amount, 0);
+
+            // Month revenue
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const incMonth = AppState.income.filter(i => i.date.startsWith(currentMonth)).reduce((a, b) => a + b.amount, 0);
+
+            document.getElementById('inc-today').innerText = `₹${incToday.toLocaleString('en-IN')}`;
+            document.getElementById('inc-week').innerText = `₹${incToday.toLocaleString('en-IN')}`;
+            document.getElementById('inc-month').innerText = `₹${incMonth.toLocaleString('en-IN')}`;
+            document.getElementById('inc-total').innerText = `₹${incTotal.toLocaleString('en-IN')}`;
+
+            // Table log
+            const body = document.getElementById('income-table-body');
+            if (AppState.income.length === 0) {
+                body.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">No income recorded yet. Click "Record Income" to track payments.</td></tr>`;
+            } else {
+                body.innerHTML = AppState.income.map(i => `
+                    <tr class="hover:bg-slate-800/30">
+                        <td class="p-3.5 text-slate-400 font-mono">${i.date}</td>
+                        <td class="p-3.5 font-bold text-white">${i.client}</td>
+                        <td class="p-3.5 text-slate-300">${i.service}</td>
+                        <td class="p-3.5 font-extrabold text-emerald-400">₹${i.amount.toLocaleString('en-IN')}</td>
+                        <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">Received</span></td>
+                        <td class="p-3.5 text-right">
+                            <button onclick="deleteIncome('${i.id}')" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function renderIncomeChart() {
+            const ctx = document.getElementById('incomeChart').getContext('2d');
+            if (incomeChartInstance) incomeChartInstance.destroy();
+
+            // Aggregate revenue by month
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthlySums = new Array(12).fill(0);
+
+            AppState.income.forEach(item => {
+                if (item.date) {
+                    const mIndex = new Date(item.date).getMonth();
+                    monthlySums[mIndex] += item.amount;
+                }
+            });
+
+            incomeChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Monthly Revenue (₹)',
+                        data: monthlySums,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: true,
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+        }
+
+        // 7. LEARNING RENDERER & CHART
+        let learningChartInstance = null;
+        function renderLearning() {
+            const list = document.getElementById('learning-goals-list');
+            if (AppState.learning.length === 0) {
+                list.innerHTML = `<div class="glass-card p-8 text-center text-slate-500 text-xs">No learning goals created yet. Click "+ Add Learning Goal".</div>`;
+                return;
+            }
+
+            list.innerHTML = AppState.learning.map(l => `
+                <div class="glass-card p-5 rounded-2xl">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-500/10 text-brand-400">${l.category}</span>
+                            <h4 class="font-bold text-white text-sm mt-1">${l.goal}</h4>
+                        </div>
+                        <span class="text-xs text-slate-400 font-mono"><i class="fa-solid fa-clock mr-1 text-brand-cyan"></i>${l.timeStudied} hrs studied</span>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-slate-400 mb-1">
+                            <span>Mastery Progress</span>
+                            <span class="font-bold text-white">${l.progress}%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-brand-600 to-brand-accent h-2 rounded-full" style="width: ${l.progress}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderLearningChart() {
+            const ctx = document.getElementById('learningChart').getContext('2d');
+            if (learningChartInstance) learningChartInstance.destroy();
+
+            const categories = ['Website Design', 'AI Tools', 'Digital Marketing', 'Trading', 'Business'];
+            const catData = categories.map(cat => {
+                return AppState.learning
+                    .filter(l => l.category === cat)
+                    .reduce((a, b) => a + b.timeStudied, 0);
+            });
+
+            learningChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        data: catData,
+                        backgroundColor: ['#6366f1', '#06b6d4', '#8b5cf6', '#f59e0b', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: true,
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // 8. NOTES RENDERER
+        let currentNoteFilter = 'ALL';
+        function filterNotes(cat) {
+            currentNoteFilter = cat;
+            document.querySelectorAll('.note-tab-btn').forEach(b => {
+                b.classList.remove('bg-brand-600/30', 'text-brand-400', 'border', 'border-brand-500/30');
+                b.classList.add('text-slate-400');
+            });
+            event.target.classList.add('bg-brand-600/30', 'text-brand-400', 'border', 'border-brand-500/30');
+            renderNotes();
+        }
+
+        function renderNotes() {
+            const grid = document.getElementById('notes-grid');
+            let notes = AppState.notes;
+            if (currentNoteFilter !== 'ALL') {
+                notes = notes.filter(n => n.category === currentNoteFilter);
+            }
+
+            if (notes.length === 0) {
+                grid.innerHTML = `<div class="col-span-full glass-card p-8 text-center text-slate-500 text-xs">No notes found in this category.</div>`;
+                return;
+            }
+
+            grid.innerHTML = notes.map(n => `
+                <div class="glass-card p-5 rounded-2xl flex flex-col justify-between border-t-2 ${n.isPinned ? 'border-t-brand-gold' : 'border-t-slate-700'}">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">${n.category}</span>
+                            <button onclick="togglePinNote('${n.id}')" class="${n.isPinned ? 'text-brand-gold' : 'text-slate-600 hover:text-slate-400'} text-xs">
+                                <i class="fa-solid fa-thumbtack"></i>
+                            </button>
+                        </div>
+                        <h4 class="font-bold text-white text-sm mb-2">${n.title}</h4>
+                        <p class="text-xs text-slate-300 whitespace-pre-line">${n.content}</p>
+                    </div>
+                    <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80 text-[10px] text-slate-500">
+                        <span>${n.date || 'Today'}</span>
+                        <button onclick="deleteNote('${n.id}')" class="hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 9. ANALYTICS CHARTS RENDERER
+        let taskChartInstance = null;
+        let outreachChartInstance = null;
+
+        function renderAnalyticsCharts() {
+            // Task Chart
+            const ctx1 = document.getElementById('analyticsTaskChart').getContext('2d');
+            if (taskChartInstance) taskChartInstance.destroy();
+
+            const completedTasksCount = AppState.priorities.filter(p => p.completed).length;
+            const pendingTasksCount = AppState.priorities.filter(p => !p.completed).length;
+
+            taskChartInstance = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Completed Tasks', 'Pending Tasks'],
+                    datasets: [{
+                        label: 'Tasks',
+                        data: [completedTasksCount, pendingTasksCount],
+                        backgroundColor: ['#10b981', '#6366f1'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: true,
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+
+            // Outreach Chart
+            const ctx2 = document.getElementById('analyticsOutreachChart').getContext('2d');
+            if (outreachChartInstance) outreachChartInstance.destroy();
+
+            const leads = AppState.leads;
+            const statusCounts = [
+                leads.filter(l => l.status === 'New Lead').length,
+                leads.filter(l => l.status === 'Contacted').length,
+                leads.filter(l => l.status === 'Demo Sent').length,
+                leads.filter(l => l.status === 'Won').length
+            ];
+
+            outreachChartInstance = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['New', 'Contacted', 'Demo Sent', 'Won'],
+                    datasets: [{
+                        label: 'Leads Count',
+                        data: statusCounts,
+                        backgroundColor: ['#94a3b8', '#3b82f6', '#f59e0b', '#10b981'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: true,
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+        }
+
+        // INITIAL APPLICATION LAUNCH
+        window.addEventListener('DOMContentLoaded', () => {
+            renderAllViews();
+        });
+    </script>
+</body>
+</html>
